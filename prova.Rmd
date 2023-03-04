@@ -1,0 +1,184 @@
+---
+title: "DP First Laboratory"
+output:
+  html_document:
+    df_print: paged
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load, message=FALSE, warning=FALSE}
+library(sdcMicro)
+```
+
+```{r dataset}
+# we can use the instruction data() to show the available datasets
+data("free1") # loads the dataset
+#we use <- to assign a value to a variable
+newdataset<-free1 # newdataset is a copy of the free1 dataset
+```
+
+```{r dataframe}
+newdataset<-as.data.frame(newdataset)
+class(newdataset)
+str(newdataset) #new structure therefore, new attributes
+attributes(newdataset)
+# ?data.frame  # you can use a question mark before a command to obtain some help
+```
+
+```{r}
+names(newdataset)[1:4]
+```
+Checking the output of the previous commands we can see the first 4 variables of the dataset being: Region, Sex, Age, Marstat.
+So that, Region, Sex and Marital Status are Categorical while Age would be continuous.
+
+```{r}
+newdataset$REGION<-as.factor(newdataset$REGION)
+newdataset$SEX<-as.factor(newdataset$SEX)
+newdataset$AGE<-as.factor(newdataset$AGE)
+newdataset$MARSTAT<-as.factor(newdataset$MARSTAT)
+```
+
+
+```{r}
+# Levels of the region parameter
+r = levels(newdataset$REGION)
+# Levels of the sex parameter
+s = levels(newdataset$SEX)
+# Levels of the age parameter
+a = levels(newdataset$AGE)
+# Levels of the marital status parameter
+m = levels(newdataset$MARSTAT)
+```
+
+```{r}
+length(r)*length(s)*length(a)*length(m)
+```
+Easy to disclure.
+
+```{r}
+contable = table(newdataset$REGION,newdataset$SEX)
+```
+
+```{r}
+print(contable)
+```
+
+```{r}
+sum(contable[contable < 2])
+sum(contable[contable < 3])
+```
+
+```{r}
+contable4 = table(newdataset$REGION,newdataset$SEX,newdataset$AGE,newdataset$MARSTAT)
+```
+
+```{r}
+sum(contable4[contable4 < 2])
+sum(contable4[contable4 < 3])
+```
+
+```{r}
+freqCalc(newdataset,keyVars = c("REGION","SEX"))
+```
+```{r}
+freqCalc(newdataset,keyVars = c("REGION","SEX","AGE","MARSTAT"))
+```
+```{r}
+dataset32<-free1
+```
+
+```{r}
+dataset32<-as.data.frame(dataset32)
+```
+
+```{r}
+sdc <- createSdcObj(
+  dat = dataset32,
+  keyVars = c("REGION","SEX","AGE","MARSTAT")
+)
+sdc <- varToFactor(sdc, "REGION")
+sdc <- varToFactor(sdc, "SEX")
+sdc <- varToFactor(sdc, "AGE")
+sdc <- varToFactor(sdc, "MARSTAT")
+```
+
+```{r}
+print(sdc, type="risk")
+print(sdc, type="kAnon")
+```
+
+```{r}
+slotNames(sdc)
+```
+
+```{r}
+sdc@risk
+```
+
+4 SDC methods:
+
+4.1 Recoding:
+
+```{r}
+regions <- sdc@manipKeyVars$REGION
+diff_regions <- levels(regions)
+```
+
+```{r}
+groups <- c(rep("NORTH",45), rep("SOUTH",45), rep("EST",45), rep("WEST", length(diff_regions)-135))
+```
+
+```{r}
+nRegions <- groupAndRename(obj = sdc, var = c("REGION"), before = c(diff_regions), after = c(groups))
+```
+
+```{r}
+table(nRegions@manipKeyVars$REGION)
+```
+
+```{r}
+table(sdc@manipKeyVars$REGION)
+```
+
+```{r}
+print(nRegions, type="kAnon")
+```
+
+```{r}
+sdc <- varToNumeric(obj = sdc, var = "AGE")
+```
+
+```{r}
+intervals <- c(0,14,25,64,Inf)
+```
+
+
+```{r}
+nAge <- globalRecode(obj = sdc, column = c("AGE"), intervals, labels = c("Children","Young","Adults","Senior"))
+```
+
+```{r}
+table(nAge@manipKeyVars$AGE)
+```
+
+```{r}
+table(sdc@manipKeyVars$AGE)
+```
+
+```{r}
+print(nAge, type="kAnon")
+```
+
+4.2 Local Suppression:
+```{r}
+class(newdataset)
+```
+
+```{r}
+sdcApp()
+```
+
