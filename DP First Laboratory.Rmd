@@ -124,26 +124,38 @@ sdc@risk
 
 4.1 Recoding:
 
+First of all, we create a list with all the regions, and a list with the different values of the regions list defined. This two lists will be used later on to recode the regions values.
 ```{r}
 regions <- sdc@manipKeyVars$REGION
 diff_regions <- levels(regions)
 ```
 
+Now, we construct a list with the different categories: North(45), South(45), Est(45) and West(total-135) following the instructions in the statement.
+
 ```{r}
 groups <- c(rep("NORTH",45), rep("SOUTH",45), rep("EST",45), rep("WEST", length(diff_regions)-135))
 ```
+
+Then we just need to use the groupAndRename function specifying the previous values, being the numbers from 1 to 182, and the new ones we want to convert to being the cardinal directions defined above. The groupAndRename function will swap each element from the before list for the value in the after list in the region column in the sdc object.
 
 ```{r}
 nRegions <- groupAndRename(obj = sdc, var = c("REGION"), before = c(diff_regions), after = c(groups))
 ```
 
+Now we can construct a table to count how many different cardinal points we have.
+
 ```{r}
 table(nRegions@manipKeyVars$REGION)
 ```
-
+Now, just to check that everything worked properly we do the following checks:
 ```{r}
-table(sdc@manipKeyVars$REGION)
+checkCorrectness <- table(sdc@manipKeyVars$REGION)
+sum(checkCorrectness[1:45])
+sum(checkCorrectness[46:90])
+sum(checkCorrectness[91:135])
+sum(checkCorrectness[136:length(diff_regions)])
 ```
+We can now check the values of 2/3 anonymity and see how they have been modified when applying our changes.
 
 ```{r}
 print(nRegions, type="kAnon")
