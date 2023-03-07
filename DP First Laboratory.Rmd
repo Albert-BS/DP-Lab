@@ -1,5 +1,8 @@
 ---
 title: "DP First Laboratory"
+author: 
+- Teresa Ricciardi
+- Albert Bertran
 output:
   pdf_document: default
   html_document:
@@ -215,10 +218,10 @@ class(newdataset)
 ```
 Now we can open the GUI and start doing the exercise.
 ```{r}
-#sdcApp()
+sdcApp()
 ```
 
-b) c) d)
+#### b)
 
 ```{r, eval=FALSE}
 #b)
@@ -249,17 +252,22 @@ sdcObj <- createSdcObj(dat=inputdata,
 opts <- get.sdcMicroObj(sdcObj, type="options")
 opts$filename <- "newdataset"
 sdcObj <- set.sdcMicroObj(sdcObj, type="options", input=list(opts))
+```
 
-#c)
+#### c)
 
+```{r}
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(3))
 sdcObj <- undolast(sdcObj)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(5))
 sdcObj <- undolast(sdcObj)
+```
 
-#d)
+#### d)
+
+```{r}
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(3))
 sdcObj <- undolast(sdcObj)
@@ -267,45 +275,12 @@ sdcObj <- undolast(sdcObj)
 sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(5))
 ```
 
-4.2 e)
+#### e)
 
 ```{r, eval=FALSE}
 
-library(sdcMicro)
-
-obj <- NULL
-if (!exists("newdataset")) {
-  stop('object "newdataset" is missing; make sure it exists.`', call. = FALSE)
-}
-obj$inputdata <- readMicrodata(path="newdataset", type="rdf", convertCharToFac=FALSE, drop_all_missings=FALSE)
-inputdataB <- obj$inputdata
-
-## Convert a numeric variable to factor (each distinct value becomes a factor level)
-inputdata <- varToFactor(obj=inputdata, var=c("RECBEN"))
-## Set up sdcMicro object
-sdcObj <- createSdcObj(dat=inputdata,
-	keyVars=c("SEX","AGE","MARSTAT","RECBEN"), 
-	numVars=NULL, 
-	weightVar=NULL, 
-	hhId=NULL, 
-	strataVar=NULL, 
-	pramVars=NULL, 
-	excludeVars=NULL, 
-	seed=0, 
-	randomizeRecords=FALSE, 
-	alpha=c(1))
-
-## Store name of uploaded file
-opts <- get.sdcMicroObj(sdcObj, type="options")
-opts$filename <- "newdataset"
-sdcObj <- set.sdcMicroObj(sdcObj, type="options", input=list(opts))
-
-
 ## Adding linked (ghost)-Variables
 sdcObj <- addGhostVars(sdcObj, keyVar="RECBEN", ghostVars=c("REGION"))
-## Local suppression to obtain k-anonymity
-sdcObj <- kAnon(sdcObj, importance=c(3,1,2,4), combs=NULL, k=c(10))
-sdcObj <- undolast(sdcObj)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(3,1,2,4), combs=NULL, k=c(10))
 
