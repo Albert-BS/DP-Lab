@@ -226,6 +226,7 @@ Now we can open the GUI and start doing the exercise.
 ```
 
 #### b)
+The following is the code that creates the sdcObject in the GUI with the categorical variables specified.
 
 ```{r, eval=FALSE}
 
@@ -258,7 +259,7 @@ sdcObj <- set.sdcMicroObj(sdcObj, type="options", input=list(opts))
 ```
 
 #### c)
-
+The following is the code for computing and checking the k-anonymity with k values being 3 or 5 and with the following order of categorical variables when computing the k-anonymity: SEX -> MARSTAT -> AGE -> REGION.
 ```{r, eval=FALSE}
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(3))
@@ -269,6 +270,7 @@ sdcObj <- undolast(sdcObj)
 ```
 
 #### d)
+The following is the same code as above but changing the importance of the categorical variables when computing the k-anonymity, now being: REGION -> AGE -> MARSTAT -> SEX. 
 
 ```{r, eval=FALSE}
 ## Local suppression to obtain k-anonymity
@@ -279,6 +281,7 @@ sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(5))
 ```
 
 #### e)
+Finally, in this last exercise we link the variable RECBEN with the REGION variable and compute the 10-anonymity with the following priority: AGE -> MARSTAT -> SEX -> RECBEN.
 
 ```{r, eval=FALSE}
 
