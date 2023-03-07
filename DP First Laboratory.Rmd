@@ -1,9 +1,10 @@
 ---
 title: "DP First Laboratory"
 output:
-  word_document: default
+  pdf_document: default
   html_document:
     df_print: paged
+  word_document: default
 date: "`r Sys.Date()`"
 ---
 
@@ -120,10 +121,11 @@ slotNames(sdc)
 sdc@risk
 ```
 
-4 SDC methods:
+## 4 SDC methods:
 
-4.1 Recoding:
+### 4.1 Recoding:
 
+#### a)
 First of all, we create a list with all the regions, and a list with the different values of the regions list defined. This two lists will be used later on to recode the regions values.
 ```{r}
 regions <- sdc@manipKeyVars$REGION
@@ -155,49 +157,71 @@ sum(checkCorrectness[46:90])
 sum(checkCorrectness[91:135])
 sum(checkCorrectness[136:length(diff_regions)])
 ```
+#### b)
 We can now check the values of 2/3 anonymity and see how they have been modified when applying our changes.
 
 ```{r}
 print(nRegions, type="kAnon")
 ```
+#### c)
+Since in the previous exercises we swap the variable type of "AGE" to factor we now need to convert it back to numeric.
 
 ```{r}
 sdc <- varToNumeric(obj = sdc, var = "AGE")
 ```
 
+Since we now want to change the variable "AGE" for a category, like: Children, Young, Adults and Senior, here we define the interval of each category being the followings:
+* (0-14)
+* (15-25)
+* (25-64)
+* (65-Inf)
+
 ```{r}
 intervals <- c(0,14,25,64,Inf)
 ```
 
+Now we can to the recode in a similar way as we did before, specifying the intervals above and the values that will get swapped, being: 
+* Children.
+* Young.
+* Adults.
+* Senior.
 
 ```{r}
 nAge <- globalRecode(obj = sdc, column = c("AGE"), intervals, labels = c("Children","Young","Adults","Senior"))
 ```
 
+After recoding we can check how many persons do we have for each interval of age.
+
 ```{r}
 table(nAge@manipKeyVars$AGE)
 ```
-
-```{r}
+??
+```{r, echo=FALSE}
 table(sdc@manipKeyVars$AGE)
 ```
+#### d)
+We can now check the new values of k-anonymity after applying the previous transformation.
 
 ```{r}
 print(nAge, type="kAnon")
 ```
 
-4.2 Local Suppression:
+### 4.2 Local Suppression:
+
+#### a)
+Before starting the GUI we just check if the dataset is a data.frame and it actually is, so we do not need to modify it.
 ```{r}
 class(newdataset)
 ```
-
+Now we can open the GUI and start doing the exercise.
 ```{r}
 #sdcApp()
 ```
 
-4.2 a) b) c) d)
+b) c) d)
 
-###
+```{r, eval=FALSE}
+#b)
 
 library(sdcMicro)
 
@@ -211,7 +235,7 @@ inputdataB <- obj$inputdata
 ## Set up sdcMicro object
 sdcObj <- createSdcObj(dat=inputdata,
 	keyVars=c("REGION","SEX","AGE","MARSTAT"), 
-	numVars=c("KINDPERS","NUMYOUNG","NUMOLD","AGEYOUNG","EDUC1","EDUC2","ETNI","PRIOCCU","POSLABM","REGJOBC","RECBEN","RECUNBEN","RECODBEN","RECBILL","RECSOSEC","RECPENS","POSLABLY","POSFACT","COMPCODE","OCCUCODE","KINDFACT","TENURE","FTPTIME","ADDJOB","JOBFIND","WEIGHT","INCOME","MONEY","ASSETS","DEBTS"), 
+	numVars=NULL, 
 	weightVar=NULL, 
 	hhId=NULL, 
 	strataVar=NULL, 
@@ -226,6 +250,7 @@ opts <- get.sdcMicroObj(sdcObj, type="options")
 opts$filename <- "newdataset"
 sdcObj <- set.sdcMicroObj(sdcObj, type="options", input=list(opts))
 
+#c)
 
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(3))
@@ -233,17 +258,18 @@ sdcObj <- undolast(sdcObj)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(5))
 sdcObj <- undolast(sdcObj)
+
+#d)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(3))
 sdcObj <- undolast(sdcObj)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(5))
-
-###
+```
 
 4.2 e)
 
-###
+```{r, eval=FALSE}
 
 library(sdcMicro)
 
@@ -283,5 +309,5 @@ sdcObj <- undolast(sdcObj)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(3,1,2,4), combs=NULL, k=c(10))
 
-###
+```
 
