@@ -174,20 +174,24 @@ sdc <- varToNumeric(obj = sdc, var = "AGE")
 ```
 
 Since we now want to change the variable "AGE" for a category, like: Children, Young, Adults and Senior, here we define the interval of each category being the followings:
+
 * (0-14)
 * (15-25)
 * (25-64)
 * (65-Inf)
+
 
 ```{r}
 intervals <- c(0,14,25,64,Inf)
 ```
 
 Now we can to the recode in a similar way as we did before, specifying the intervals above and the values that will get swapped, being: 
+
 * Children.
 * Young.
 * Adults.
 * Senior.
+
 
 ```{r}
 nAge <- globalRecode(obj = sdc, column = c("AGE"), intervals, labels = c("Children","Young","Adults","Senior"))
@@ -218,13 +222,12 @@ class(newdataset)
 ```
 Now we can open the GUI and start doing the exercise.
 ```{r}
-sdcApp()
+#sdcApp()
 ```
 
 #### b)
 
 ```{r, eval=FALSE}
-#b)
 
 library(sdcMicro)
 
@@ -256,7 +259,7 @@ sdcObj <- set.sdcMicroObj(sdcObj, type="options", input=list(opts))
 
 #### c)
 
-```{r}
+```{r, eval=FALSE}
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(3))
 sdcObj <- undolast(sdcObj)
@@ -267,7 +270,7 @@ sdcObj <- undolast(sdcObj)
 
 #### d)
 
-```{r}
+```{r, eval=FALSE}
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(3))
 sdcObj <- undolast(sdcObj)
