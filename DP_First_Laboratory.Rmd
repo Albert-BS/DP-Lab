@@ -15,40 +15,44 @@ date: "`r Sys.Date()`"
 knitr::opts_chunk$set(echo = TRUE, results="hide")
 ```
 
+## 3 Working with sdcMicro
+
+### 3.1 Inspect a dataset and calculate k-anonymity using R
+
+To start this laboratory the first step to do is to load the ‘sdcMicro’ package for statistical disclosure control methods, into our R session and then load the dataset ‘free1’ available in the sdcMicro package.
+
 ```{r load, message=FALSE, warning=FALSE}
 library(sdcMicro)
-```
-
-```{r dataset}
-# we can use the instruction data() to show the available datasets
 data("free1") # loads the dataset
-#we use <- to assign a value to a variable
-newdataset<-free1 # newdataset is a copy of the free1 dataset
 ```
 
-```{r dataframe}
+The next step to do is to create a copy of the ‘free1’ dataset and coerce it to a data frame because many R functions and packages for data manipulation and analysis are designed to work specifically with data frames. Afterwards we check the class of ‘newdataset’ to be sure it is a data frame and we use the command to know the structure of it.
+
+In addition we use the command ‘attributes()’ to obtain a list of attributes associated with the data frame and the command ‘names()’ to get a vector of the first four variable names in the data frame.
+
+```{r}
+newdataset<-free1 # newdataset is a copy of the free1 dataset
 newdataset<-as.data.frame(newdataset)
 class(newdataset)
 str(newdataset) #new structure therefore, new attributes
 attributes(newdataset)
-# ?data.frame  # you can use a question mark before a command to obtain some help
 ```
+
+#### a)
+Checking the output of the following command we can see the first 4 variables of the dataset being: Region, Sex, Age, Marstat. Therefore, taking into account their meaning, Region, Sex and Marital Status are Categorical variables while Age would be a continuous variable.
 
 ```{r}
 names(newdataset)[1:4]
 ```
-Checking the output of the previous commands we can see the first 4 variables of the dataset being: Region, Sex, Age, Marstat.
-So that, Region, Sex and Marital Status are Categorical while Age would be continuous.
+
+#### b)
+At this point we have to convert the four variables above to a factor because we want to represent them as categorical variables and then we create vectors that contain the levels of the four variables.
 
 ```{r}
 newdataset$REGION<-as.factor(newdataset$REGION)
 newdataset$SEX<-as.factor(newdataset$SEX)
 newdataset$AGE<-as.factor(newdataset$AGE)
 newdataset$MARSTAT<-as.factor(newdataset$MARSTAT)
-```
-
-
-```{r}
 # Levels of the region parameter
 r = levels(newdataset$REGION)
 # Levels of the sex parameter
@@ -57,50 +61,42 @@ s = levels(newdataset$SEX)
 a = levels(newdataset$AGE)
 # Levels of the marital status parameter
 m = levels(newdataset$MARSTAT)
-```
 
-```{r}
 length(r)*length(s)*length(a)*length(m)
 ```
-Easy to disclure.
+
+After having done the last operation, we obtain that the number of possible keys that can be performed with these four variables is ‘87360’, and comparing this value with the number of records in the dataset (4000) we can say that, since the number of possible keys is much higher that the number of records it is less likely that there will be rare keys that are easy to disclosure.
+
+Now we have to create a contingency table with the REGION and SEX variables, and then another with the REGION, SEX, AGE and MARSTAT variables, and we use the command ‘sum()’ to see how many keys violate the 2-anonymity and the 3-anonymity condition.
+The results are shown below with the use of the function ‘freqCalc()’.
+
 
 ```{r}
 contable = table(newdataset$REGION,newdataset$SEX)
-```
 
-```{r}
 print(contable)
-```
 
-```{r}
 sum(contable[contable < 2])
 sum(contable[contable < 3])
-```
 
-```{r}
 contable4 = table(newdataset$REGION,newdataset$SEX,newdataset$AGE,newdataset$MARSTAT)
-```
 
-```{r}
 sum(contable4[contable4 < 2])
 sum(contable4[contable4 < 3])
-```
 
-```{r}
 freqCalc(newdataset,keyVars = c("REGION","SEX"))
-```
-```{r}
+
 freqCalc(newdataset,keyVars = c("REGION","SEX","AGE","MARSTAT"))
 ```
+
+The aim of the following part of the laboratory is to inspect  the dataset and to do that we have to create an sdcObject. As a first step we have to create a new data frame from the data set ‘free1’ and then create the object ‘sdc’ and convert the variables to factors.
+After that we use the command ‘print()’ with the correct type options to obtain the re-identification risk and the k-anonymity information that are shown below.
+
 ```{r}
 dataset32<-free1
-```
 
-```{r}
 dataset32<-as.data.frame(dataset32)
-```
 
-```{r}
 sdc <- createSdcObj(
   dat = dataset32,
   keyVars = c("REGION","SEX","AGE","MARSTAT")
@@ -109,18 +105,16 @@ sdc <- varToFactor(sdc, "REGION")
 sdc <- varToFactor(sdc, "SEX")
 sdc <- varToFactor(sdc, "AGE")
 sdc <- varToFactor(sdc, "MARSTAT")
-```
 
-```{r}
 print(sdc, type="risk")
 print(sdc, type="kAnon")
 ```
 
-```{r}
-slotNames(sdc)
-```
+Then we check the available slots of the object and we access the slot ‘risk’.
 
 ```{r}
+slotNames(sdc)
+
 sdc@risk
 ```
 
@@ -202,7 +196,9 @@ After recoding we can check how many persons do we have for each interval of age
 ```{r}
 table(nAge@manipKeyVars$AGE)
 ```
-??
+
+As we did before when swapping the region to cardinal points, we can check the correctness of the previous steps with the following command, checking the different ages in the original data.
+
 ```{r, echo=FALSE}
 table(sdc@manipKeyVars$AGE)
 ```
