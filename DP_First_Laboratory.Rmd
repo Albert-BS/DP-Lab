@@ -265,6 +265,20 @@ sdcObj <- kAnon(sdcObj, importance=c(4,1,3,2), combs=NULL, k=c(5))
 sdcObj <- undolast(sdcObj)
 ```
 
+The following is a table with the suppressed values when applying k-anonymity and the time it took to compute it:
+
+| Suppressed values | 3-Anonymity | 5-Anonymity |
+|-------------------|-------------|-------------|
+| Region            | 3701        | 3870        |
+| Sex               | 0           | 0           |
+| Age               | 38          | 105         |
+| Marstat           | 0           | 0           |
+||||
+| Total time        | 7.91s       | 16.14s      |
+| Time (prev-new)   | 7.91s       | 8.23s       |
+
+Note that the most suppressed values are Region and Age, the ones with most different values and therefore the ones that can identify the most. Since Marstat has only 4 possible values and Sex 2. Also note that as the value of k increases, the computation time to achieve k-anonymity also increases.
+
 #### d)
 The following is the same code as above but changing the importance of the categorical variables when computing the k-anonymity, now being: REGION -> AGE -> MARSTAT -> SEX. 
 
@@ -275,6 +289,20 @@ sdcObj <- undolast(sdcObj)
 ## Local suppression to obtain k-anonymity
 sdcObj <- kAnon(sdcObj, importance=c(1,4,2,3), combs=NULL, k=c(5))
 ```
+
+The following is a table with the suppressed values when applying k-anonymity and the time it took to compute it with the following order of variables: Region -> Age -> Marstat -> Sex.
+
+| Suppressed values | 3-Anonymity | 5-Anonymity |
+|-------------------|-------------|-------------|
+| Region            | 10          | 10          |
+| Sex               | 1849        | 2174        |
+| Age               | 1220        | 1351        |
+| Marstat           | 855         | 1213        |
+||||
+| Total time        | 34.18s      | 57.09s      |
+| Time (prev-new)   | 18.04s      | 22.91s      |
+
+In this second table, we can see that instead of just suppressing 2 variables as we did before, we now suppress data from all the 4 variables.
 
 #### e)
 Finally, in this last exercise we link the variable RECBEN with the REGION variable and compute the 10-anonymity with the following priority: AGE -> MARSTAT -> SEX -> RECBEN.
@@ -288,3 +316,9 @@ sdcObj <- kAnon(sdcObj, importance=c(3,1,2,4), combs=NULL, k=c(10))
 
 ```
 
+The next table represents the number of suppressions in the variables RECBEN and Region and as can be seen, apart from reducing the number of suppressed values in the previous sections, since the Region got related with RECBEN, we can see that the values are the same since they are linked together.
+
+| Suppressed values | Before      | After       |
+|-------------------|-------------|-------------|
+| RECBEN            | 0          | 437          |
+| REGION            | 0        | 437        |
