@@ -1,0 +1,118 @@
+---
+title: "DP Second Laboratory"
+author:
+- Teresa Ricciardi
+- Albert Bertran
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load, message=FALSE, warning=FALSE}
+library(sdcMicro)
+data("free1") # loads the dataset
+```
+
+```{r}
+newdataset<-free1
+```
+
+```{r}
+v <- table(newdataset[,"MARSTAT"])
+v
+```
+```{r}
+mdat <- matrix(c(0.5,0.4,0.1,0,
+                 0.1,0.6,0.2,0.1,
+                 0.1,0.3,0.6,0,
+                 0,0.1,0.2,0.7), nrow = 4, byrow = TRUE, dimnames = list(c("single","married","divorced","widow"), c("single","married","divorced","widow")))
+```
+
+```{r}
+crossprod(v, mdat)
+```
+
+```{r}
+newdataset<-as.data.frame(newdataset)
+```
+
+
+```{r}
+#sdcApp()
+```
+
+```{r}
+dataset32<-free1
+
+dataset32<-as.data.frame(dataset32)
+
+sdc <- createSdcObj(
+  dat = dataset32,
+  keyVars = c("REGION","SEX","AGE","MARSTAT"),
+  numVars = c("INCOME","ASSETS","DEBTS")
+)
+sdc <- varToFactor(sdc, "REGION")
+sdc <- varToFactor(sdc, "SEX")
+sdc <- varToFactor(sdc, "AGE")
+sdc <- varToFactor(sdc, "MARSTAT")
+```
+
+```{r}
+# mdav, single, onedims
+start <- Sys.time()
+sdc1 <- microaggregation(obj = sdc, method = "mdav", aggr  = 4)
+mdavTime <- Sys.time()
+round(mdavTime-start,4)
+
+sdc1 <- microaggregation(obj = sdc, method = "single", aggr = 4)
+singleTime <- Sys.time()
+round(singleTime-mdavTime,4)
+
+sdc1 <- microaggregation(obj = sdc, method = "onedims", aggr = 4)
+onedimsTime <- Sys.time()
+round(onedimsTime-singleTime,4)
+```
+
+```{r}
+sdc1@risk$numeric
+```
+
+```{r}
+sdc1@utility$il1
+```
+
+```{r}
+sdc1@utility$eigen
+```
+Replicate the above with each algorithm.
+
+```{r}
+microaggregation(obj = sdc, method = "mdav", aggr = 4)
+```
+
+
+```{r}
+histogram = c()
+```
+
+
+```{r}
+original <- sdc@origData[,sdc@numVars]
+meanOrig <- c(mean(original[,1]), mean(original[,2]), mean(original[,3]))
+sst <- sum((original - meanOrig)^2)
+for (k in 2:100) {
+  sdcMdavFor <- microaggregation(obj = sdc, method = "mdav", aggr = k)
+  manip <- sdcMdavFor@manipNumVars
+  sse <- sum((original - manip)^2)
+  L <- sse / sst
+  histogram[k] <- L
+}
+plot(histogram)
+
+```
+
+
+

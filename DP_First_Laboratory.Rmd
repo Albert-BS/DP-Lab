@@ -12,7 +12,7 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, results="hide")
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## 3 Working with sdcMicro
@@ -30,7 +30,7 @@ The next step to do is to create a copy of the ‘free1’ dataset and coerce it
 
 In addition we use the command ‘attributes()’ to obtain a list of attributes associated with the data frame and the command ‘names()’ to get a vector of the first four variable names in the data frame.
 
-```{r}
+```{r, R.options=list(max.print=100)}
 newdataset<-free1 # newdataset is a copy of the free1 dataset
 newdataset<-as.data.frame(newdataset)
 class(newdataset)
@@ -74,8 +74,6 @@ The results are shown below with the use of the function ‘freqCalc()’.
 ```{r}
 contable = table(newdataset$REGION,newdataset$SEX)
 
-print(contable)
-
 sum(contable[contable < 2])
 sum(contable[contable < 3])
 
@@ -112,12 +110,12 @@ print(sdc, type="kAnon")
 
 Then we check the available slots of the object and we access the slot ‘risk’.
 
-```{r}
+```{r, R.options=list(max.print=100)}
 slotNames(sdc)
 
 sdc@risk
 ```
-
+\newpage
 ## 4 SDC methods:
 
 ### 4.1 Recoding:
@@ -199,7 +197,7 @@ table(nAge@manipKeyVars$AGE)
 
 As we did before when swapping the region to cardinal points, we can check the correctness of the previous steps with the following command, checking the different ages in the original data.
 
-```{r, echo=FALSE}
+```{r}
 table(sdc@manipKeyVars$AGE)
 ```
 #### d)
@@ -302,7 +300,9 @@ The following is a table with the suppressed values when applying k-anonymity an
 | Total time        | 34.18s      | 57.09s      |
 | Time (prev-new)   | 18.04s      | 22.91s      |
 
-In this second table, we can see that instead of just suppressing 2 variables as we did before, we now suppress data from all the 4 variables.
+In this second table, we can see that instead of just suppressing 2 variables as we did before, we now suppress data from all the 4 variables. This is due to the fact, that in the previous section we start by grouping Sex and Marstat and it's difficult to identify someone only by these variables, therefore no suppression is needed till we group with age and some identifications can be done. But in this section, as we group the Region with the Age we get already some identifications, this is why we need to suppress values of each variable.
+
+The main conclusion is that when we apply local suppression, we should consider starting by the variables that have less possible values and therefore less restrictives since we would need to suppress less values and the computation time will be faster.
 
 #### e)
 Finally, in this last exercise we link the variable RECBEN with the REGION variable and compute the 10-anonymity with the following priority: AGE -> MARSTAT -> SEX -> RECBEN.
