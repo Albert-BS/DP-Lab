@@ -3,8 +3,10 @@ title: "DP Second Laboratory"
 author:
 - Teresa Ricciardi
 - Albert Bertran
-output: pdf_document
 date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -44,6 +46,12 @@ newdataset<-as.data.frame(newdataset)
 #sdcApp()
 ```
 
+## 2.Microaggregation
+
+### a) Compare the univariate, multivariate simple, and mdav microaggregation algorithms.
+
+#### 1. Create an sdc object with the free1 dataset using REGION, SEX, AGE and MARSTAT as categorical variables and INCOME, ASSETS and DEBTS as numeric variables.
+
 ```{r}
 dataset32<-free1
 
@@ -60,38 +68,48 @@ sdc <- varToFactor(sdc, "AGE")
 sdc <- varToFactor(sdc, "MARSTAT")
 ```
 
+#### 2. Execute the different microaggregation algorithms using 𝑘 = 4 and compute the execution time for each of them. (𝑘 is the minimum size of each group).
+
 ```{r}
 # mdav, single, onedims
-start <- Sys.time()
-sdc1 <- microaggregation(obj = sdc, method = "mdav", aggr  = 4)
-mdavTime <- Sys.time()
-round(mdavTime-start,4)
+print("Mdav algorithm time:")
+startMdav <- Sys.time()
+mdavSdc <- microaggregation(obj = sdc, method = "mdav", aggr  = 4)
+endMdav <- Sys.time()
+round(endMdav-startMdav,4)
 
-sdc1 <- microaggregation(obj = sdc, method = "single", aggr = 4)
-singleTime <- Sys.time()
-round(singleTime-mdavTime,4)
+print("Single algorithm time:")
+startSingle <- Sys.time()
+singleSdc <- microaggregation(obj = sdc, method = "single", aggr = 4)
+endSingle <- Sys.time()
+round(endSingle-startSingle,4)
 
-sdc1 <- microaggregation(obj = sdc, method = "onedims", aggr = 4)
-onedimsTime <- Sys.time()
-round(onedimsTime-singleTime,4)
+print("Onedims algorithm time:")
+startOnedims <- Sys.time()
+onedimsSdc <- microaggregation(obj = sdc, method = "onedims", aggr = 4)
+endOnedims <- Sys.time()
+round(endOnedims-startOnedims,4)
+```
+#### 3. From the new_sdc object get the following risk and utility measurements.
+
+```{r}
+mdavSdc@risk$numeric
+singleSdc@risk$numeric
+onedimsSdc@risk$numeric
 ```
 
 ```{r}
-sdc1@risk$numeric
+mdavSdc@utility$il1
+singleSdc@utility$il1
+onedimsSdc@utility$il1
 ```
 
 ```{r}
-sdc1@utility$il1
-```
-
-```{r}
-sdc1@utility$eigen
+mdavSdc@utility$eigen
+singleSdc@utility$eigen
+onedimsSdc@utility$eigen
 ```
 Replicate the above with each algorithm.
-
-```{r}
-microaggregation(obj = sdc, method = "mdav", aggr = 4)
-```
 
 
 ```{r}
