@@ -76,32 +76,35 @@ print("Mdav algorithm time:")
 startMdav <- Sys.time()
 mdavSdc <- microaggregation(obj = sdc, method = "mdav", aggr  = 4)
 endMdav <- Sys.time()
-round(endMdav-startMdav,4)
+mdav_time <- round(endMdav-startMdav,4)
+mdav_time
 
 print("Single algorithm time:")
 startSingle <- Sys.time()
 singleSdc <- microaggregation(obj = sdc, method = "single", aggr = 4)
 endSingle <- Sys.time()
-round(endSingle-startSingle,4)
+single_time <- round(endSingle-startSingle,4)
+single_time
 
 print("Onedims algorithm time:")
 startOnedims <- Sys.time()
 onedimsSdc <- microaggregation(obj = sdc, method = "onedims", aggr = 4)
 endOnedims <- Sys.time()
-round(endOnedims-startOnedims,4)
+onedims_time <- round(endOnedims-startOnedims,4)
+onedims_time
 ```
 #### 3. From the new_sdc object get the following risk and utility measurements.
 
 ```{r}
-mdavSdc@risk$numeric
-singleSdc@risk$numeric
-onedimsSdc@risk$numeric
+mdav_numeric <- mdavSdc@risk$numeric
+single_numeric <- singleSdc@risk$numeric
+onedims_numeric <- onedimsSdc@risk$numeric
 ```
 
 ```{r}
-mdavSdc@utility$il1
-singleSdc@utility$il1
-onedimsSdc@utility$il1
+mdav_util <- mdavSdc@utility$il1
+single_util <- singleSdc@utility$il1
+onedim_util <- onedimsSdc@utility$il1
 ```
 
 ```{r}
