@@ -7,6 +7,7 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -17,34 +18,92 @@ knitr::opts_chunk$set(echo = TRUE)
 library(sdcMicro)
 data("free1") # loads the dataset
 ```
+## 1.PRAM (Post Randomization Method)
+
+### a) Use table() to obtain the frequencies for each category of the MARSTAT variable of the free1 dataset. Define your own P matrix (remember the sum of the rows must be 1) and calculate the theoretical expected frequency for each category after “praming” the MARSTAT variable. Are the expected values of the frequencies after “praming” similar to the original ones? First, we create a newdataset from the "free1" dataset and we check the different values MARSTAT has.
 
 ```{r}
 newdataset<-free1
-```
-
-```{r}
 v <- table(newdataset[,"MARSTAT"])
 v
 ```
+We now create a P matrix to use for pramming. The values used are just the ones in the slides of the session.
+
 ```{r}
 mdat <- matrix(c(0.5,0.4,0.1,0,
                  0.1,0.6,0.2,0.1,
                  0.1,0.3,0.6,0,
-                 0,0.1,0.2,0.7), nrow = 4, byrow = TRUE, dimnames = list(c("single","married","divorced","widow"), c("single","married","divorced","widow")))
+                 0,0.1,0.2,0.7), nrow = 4, byrow = TRUE,
+               dimnames = list(c("single","married","divorced","widow"),
+                               c("single","married","divorced","widow")))
+mdat
 ```
+Now, using crossprod we can compute the new values, noting that they differ a lot from the original ones, so the matrix used is not ideal.
 
 ```{r}
 crossprod(v, mdat)
 ```
 
+We now convert the dataset to a dataframe to access it in the sdcApp.
+
 ```{r}
 newdataset<-as.data.frame(newdataset)
 ```
+
+### b) Check your result using sdcApp(). Setup a DSC problem using the free1 dataset selecting REGION, SEX and AGE as categorical variables and MARSTAT as the variable to be “pramed”. To obtain always the same result with probabilistic methods use the same seed. (Don’t worry about parameter alpha). Obtain the frequencies for each category of the variable MARSTAT (“Microdata/Explore variables” option). Use PRAM (expert) option in the “Anonymize” menu to “pram” MARSTAT with the matrix that you have defined in the previous section. Check the new frequencies (“Anonymize/Explore variables” option).
 
 
 ```{r}
 #sdcApp()
 ```
+Frequencies before applying PRAM using our custom matrix:
+
+|Age/Marstat|1|2|3|4|
+|:-:|:-:|:-:|:-:|:-:|
+|15|1|0|0|55|
+|16|1|0|0|72|
+|17|2|0|0|59|
+|18|0|0|0|61|
+
+Frequencies after applying PRAM using our custom matrix:
+
+|Age/Marstat|1|2|3|4|
+|:-:|:-:|:-:|:-:|:-:|
+|15|36|0|2|18|
+|16|32|1|2|38|
+|17|30|2|3|26|
+|18|20|0|3|38|
+
+As can be seen, the values differ a lot from the original ones.
+
+### c) Undo the last step and go to the “Anonymize/PRAM (simple)” option to create an invariant probability transition matrix and “pram” the variable MARSTAT (use the default values pd=0.8 and alpha=0.5). Create a table comparing the frequencies and percentages of the MARSTAT variable before and after “praming” (use “Explore variables” in “Microdata” and “Anonymize” menus). Are the frequencies similar?
+
+Before applying pram simple:
+
+|Marstat|Frequency|Percentage|
+|:-:|:-:|:-:|
+|1|2547|63.68|
+|2|162|4.05|
+|3|171|4.28|
+|4|1120|28|
+|Sum|4000|100|
+
+After applying pram simple:
+
+|Marstat|Frequency|Percentage|
+|:-:|:-:|:-:|
+|1|2570|64.25|
+|2|154|3.85|
+|3|168|4.2|
+|4|1108|27.7|
+|Sum|4000|100|
+
+### d) Create an sdcObject like the one in the previous sections and “pram” the MARSTAT variable. Get the PRAM array from the "pram" slot of the sdcObject and perform the following calculation:
+
+* Transpose the matrix and calculate the eigenvalues and the eigenvectors
+* Check that 1 is one of the eigenvalues
+* Normalize its associated eigenvector so that the sum of its components is 1.
+* Compare the eigenvector with the percentages of the original values of MARSTAT. Drawn your own conclusions.
 
 ## 2.Microaggregation
 
@@ -68,7 +127,7 @@ sdc <- varToFactor(sdc, "AGE")
 sdc <- varToFactor(sdc, "MARSTAT")
 ```
 
-#### 2. Execute the different microaggregation algorithms using 𝑘 = 4 and compute the execution time for each of them. (𝑘 is the minimum size of each group).
+#### 2. Execute the different microaggregation algorithms using K = 4 and compute the execution time for each of them. (K is the minimum size of each group).
 
 ```{r}
 # mdav, single, onedims
@@ -93,27 +152,40 @@ endOnedims <- Sys.time()
 onedims_time <- round(endOnedims-startOnedims,4)
 onedims_time
 ```
+
 #### 3. From the new_sdc object get the following risk and utility measurements.
 
 ```{r}
-mdav_numeric <- mdavSdc@risk$numeric
-single_numeric <- singleSdc@risk$numeric
-onedims_numeric <- onedimsSdc@risk$numeric
-```
+mdav_risk <- mdavSdc@risk$numeric
+single_risk <- singleSdc@risk$numeric
+onedims_risk <- onedimsSdc@risk$numeric
 
-```{r}
 mdav_util <- mdavSdc@utility$il1
 single_util <- singleSdc@utility$il1
-onedim_util <- onedimsSdc@utility$il1
+onedims_util <- onedimsSdc@utility$il1
+
+mdav_eigen <- mdavSdc@utility$eigen
+single_eigen <- singleSdc@utility$eigen
+onedims_eigen <- onedimsSdc@utility$eigen
 ```
+
+We can now create the dataframe with the results obtained.
 
 ```{r}
-mdavSdc@utility$eigen
-singleSdc@utility$eigen
-onedimsSdc@utility$eigen
-```
-Replicate the above with each algorithm.
+algorithm <- c("MDAV", "Single","Onedims")
+time <- c(mdav_time, single_time, onedims_time)
+risk <- c(mdav_risk, single_risk, onedims_risk)
+utility <- c(mdav_util, single_util, onedims_util)
+eigen <- c(mdav_eigen, single_eigen, onedims_eigen)
 
+df_results <- data.frame(algorithm, time, risk, utility, eigen)
+
+print(df_results)
+```
+
+From the results presented above, we can justify why MDAV is the most widely used microaggregation algorithm since it achieves a good balance between risk and utility. It has a lower risk value, indicating that it preserves more of the original data, and a lower utility, indicating that it distorts  the data less. Regarding the eigen column measuring the loss of correlation between the variables and MDAV also performs well. Additionally, MDAV also has a reasonable running time, resulting a good choice when choosing a microaggregation algorithm.
+
+### b)In order to check the trade-off between risk and utility, use the sdc object created in the previous section and run mdav for values of K from 2 to 100. Calculate the L parameter in each case. Plot K vs L.
 
 ```{r}
 histogram = c()
@@ -131,9 +203,10 @@ for (k in 2:100) {
   L <- sse / sst
   histogram[k] <- L
 }
-plot(histogram)
+plot(histogram, xlab = "k_value", ylab = "L_value")
 
 ```
 
+Finally we can observe the correlation between the K and L value obtained when increasing the value of K.
 
 
