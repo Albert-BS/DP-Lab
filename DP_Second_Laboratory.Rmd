@@ -7,7 +7,9 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
-  pdf_document: default
+  word_document: default
+  pdf_document: 
+    keep_tex: true
 ---
 
 ```{r setup, include=FALSE}
@@ -58,27 +60,29 @@ newdataset<-as.data.frame(newdataset)
 ```
 Frequencies before applying PRAM using our custom matrix:
 
-|Age/Marstat|1|2|3|4|
-|:-:|:-:|:-:|:-:|:-:|
-|15|1|0|0|55|
-|16|1|0|0|72|
-|17|2|0|0|59|
-|18|0|0|0|61|
+|Marstat|Frequency|Percentage|
+|:-:|:-:|:-:|
+|1|2547|63.68|
+|2|162|4.05|
+|3|171|4.28|
+|4|1120|28|
+|Sum|4000|100|
 
 Frequencies after applying PRAM using our custom matrix:
 
-|Age/Marstat|1|2|3|4|
-|:-:|:-:|:-:|:-:|:-:|
-|15|36|0|2|18|
-|16|32|1|2|38|
-|17|30|2|3|26|
-|18|20|0|3|38|
+|Marstat|Frequency|Percentage|
+|:-:|:-:|:-:|
+|1|1357|33.92|
+|2|1224|30.60|
+|3|633|15.82|
+|4|786|19.65|
+|Sum|4000|100|
 
-As can be seen, the values differ a lot from the original ones.
+As can be seen, the values differ a lot from the original ones, so the matrix is not ideal as we figured out already in the previous exercise.
 
 ### c) Undo the last step and go to the “Anonymize/PRAM (simple)” option to create an invariant probability transition matrix and “pram” the variable MARSTAT (use the default values pd=0.8 and alpha=0.5). Create a table comparing the frequencies and percentages of the MARSTAT variable before and after “praming” (use “Explore variables” in “Microdata” and “Anonymize” menus). Are the frequencies similar?
 
-Before applying pram simple:
+Frequencies and percentages before applying pram simple:
 
 |Marstat|Frequency|Percentage|
 |:-:|:-:|:-:|
@@ -88,15 +92,17 @@ Before applying pram simple:
 |4|1120|28|
 |Sum|4000|100|
 
-After applying pram simple:
+Frequencies and percentages after applying pram simple:
 
 |Marstat|Frequency|Percentage|
 |:-:|:-:|:-:|
-|1|2570|64.25|
-|2|154|3.85|
-|3|168|4.2|
-|4|1108|27.7|
+|1|2538|63.45|
+|2|166|4.15|
+|3|176|4.4|
+|4|1120|28|
 |Sum|4000|100|
+
+In this case, since the matrix used is way more accurate to the data we are using, we can see that the percentages and frequencies are almost the same before and after applying PRAM, with some small changes.
 
 ### d) Create an sdcObject like the one in the previous sections and “pram” the MARSTAT variable. Get the PRAM array from the "pram" slot of the sdcObject and perform the following calculation:
 
@@ -104,6 +110,87 @@ After applying pram simple:
 * Check that 1 is one of the eigenvalues
 * Normalize its associated eigenvector so that the sum of its components is 1.
 * Compare the eigenvector with the percentages of the original values of MARSTAT. Drawn your own conclusions.
+
+Note that even though we run the commands in the console we attach them here.
+
+Creation of the problem.
+```{r}
+inputdata <- readMicrodata(path="newdataset", type="rdf", convertCharToFac=FALSE, drop_all_missings=FALSE)
+
+inputdataB <- inputdata
+
+inputdataB <- varToFactor(obj=inputdataB, var=c("SEX")) 
+inputdataB <- varToFactor(obj=inputdataB, var=c("AGE")) 
+inputdataB <- varToFactor(obj=inputdataB, var=c("REGION")) 
+inputdataB <- varToFactor(obj=inputdataB, var=c("MARSTAT"))
+
+sdcObj <- createSdcObj(dat=inputdataB, 
+                       keyVars=c("REGION","SEX","AGE"),  
+                       numVars=NULL,  
+                       weightVar=NULL,  
+                       hhId=NULL,  
+                       strataVar=NULL,  
+                       pramVars=c("MARSTAT"),  
+                       excludeVars=NULL,  
+                       seed=500,  
+                       randomizeRecords=FALSE,  
+                       alpha=c(1))
+```
+
+Setting the transition matrix.
+
+```{r}
+sdcObjp <- pram(sdcObj, variables=c("MARSTAT"), pd=0.8, alpha=0.5)
+P <- sdcObjp@pram$params$MARSTAT$Rs
+P
+```
+Transposing the matrix and obtaining the eigenvectors and eigenvalues.
+
+```{r}
+transpose <- t(P)
+transpose
+eigen(transpose)
+```
+Normalize of the first eigenvector, the one associated with the 1 eigenvalue.
+
+```{r}
+eig <- eigen(transpose)
+
+eigvec <- eig$vectors[,1]
+eigvec <- eigvec / sum(eigvec)
+eigvec
+```
+
+As can be seen, the percentages, are almost the same so the praming procedure did not have a significant impact on the distribution of categories.
+
+Now let's execute again sdcApp() with pd=0.2 and alpha=0.9 and check the results.
+
+The following tables represents before and after applying PRAM(Simple) with the parameters above. Note that the numbers of MARSTAT represents the following status:
+
+* 4 -> Single
+* 3 -> Widle
+* 2 -> Divorced
+* 1 -> Married
+
+The following is the original values of the range (15-18):
+
+|Age/Marstat|1|2|3|4|
+|:-:|:-:|:-:|:-:|:-:|
+|15|1|0|0|55|
+|16|1|0|0|72|
+|17|2|0|0|59|
+|18|0|0|0|61|
+
+And after applying PRAM we obtain:
+
+|Age/Marstat|1|2|3|4|
+|:-:|:-:|:-:|:-:|:-:|
+|15|32|2|2|20|
+|16|44|4|2|23|
+|17|32|3|5|21|
+|18|42|0|1|18|
+
+We can see that the result is far away from the original values. The most significant case is that, there are 32 15-years old persons married, which is quite atypical among young people. In order to avoid this problem, we could modify the transition matrix so not that much people turn into married when single.
 
 ## 2.Microaggregation
 
@@ -130,26 +217,29 @@ sdc <- varToFactor(sdc, "MARSTAT")
 #### 2. Execute the different microaggregation algorithms using K = 4 and compute the execution time for each of them. (K is the minimum size of each group).
 
 ```{r}
-# mdav, single, onedims
-print("Mdav algorithm time:")
 startMdav <- Sys.time()
 mdavSdc <- microaggregation(obj = sdc, method = "mdav", aggr  = 4)
 endMdav <- Sys.time()
 mdav_time <- round(endMdav-startMdav,4)
+print("Mdav algorithm time:")
 mdav_time
+```
 
-print("Single algorithm time:")
+```{r}
 startSingle <- Sys.time()
 singleSdc <- microaggregation(obj = sdc, method = "single", aggr = 4)
 endSingle <- Sys.time()
 single_time <- round(endSingle-startSingle,4)
+print("Single algorithm time:")
 single_time
+```
 
-print("Onedims algorithm time:")
+```{r}
 startOnedims <- Sys.time()
 onedimsSdc <- microaggregation(obj = sdc, method = "onedims", aggr = 4)
 endOnedims <- Sys.time()
 onedims_time <- round(endOnedims-startOnedims,4)
+print("Onedims algorithm time:")
 onedims_time
 ```
 

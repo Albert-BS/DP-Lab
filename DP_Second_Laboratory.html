@@ -1683,6 +1683,257 @@ variable MARSTAT (“Microdata/Explore variables” option). Use PRAM
 matrix that you have defined in the previous section. Check the new
 frequencies (“Anonymize/Explore variables” option).</h3>
 <pre class="r"><code>#sdcApp()</code></pre>
+<p>Frequencies before applying PRAM using our custom matrix:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Marstat</th>
+<th align="center">Frequency</th>
+<th align="center">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">2547</td>
+<td align="center">63.68</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">162</td>
+<td align="center">4.05</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">171</td>
+<td align="center">4.28</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">1120</td>
+<td align="center">28</td>
+</tr>
+<tr class="odd">
+<td align="center">Sum</td>
+<td align="center">4000</td>
+<td align="center">100</td>
+</tr>
+</tbody>
+</table>
+<p>Frequencies after applying PRAM using our custom matrix:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Marstat</th>
+<th align="center">Frequency</th>
+<th align="center">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">1357</td>
+<td align="center">33.92</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">1224</td>
+<td align="center">30.60</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">633</td>
+<td align="center">15.82</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">786</td>
+<td align="center">19.65</td>
+</tr>
+<tr class="odd">
+<td align="center">Sum</td>
+<td align="center">4000</td>
+<td align="center">100</td>
+</tr>
+</tbody>
+</table>
+<p>As can be seen, the values differ a lot from the original ones, so
+the matrix is not ideal as we figured out already in the previous
+exercise.</p>
+</div>
+<div id="c-undo-the-last-step-and-go-to-the-anonymizepram-simple-option-to-create-an-invariant-probability-transition-matrix-and-pram-the-variable-marstat-use-the-default-values-pd0.8-and-alpha0.5.-create-a-table-comparing-the-frequencies-and-percentages-of-the-marstat-variable-before-and-after-praming-use-explore-variables-in-microdata-and-anonymize-menus.-are-the-frequencies-similar" class="section level3">
+<h3>c) Undo the last step and go to the “Anonymize/PRAM (simple)” option
+to create an invariant probability transition matrix and “pram” the
+variable MARSTAT (use the default values pd=0.8 and alpha=0.5). Create a
+table comparing the frequencies and percentages of the MARSTAT variable
+before and after “praming” (use “Explore variables” in “Microdata” and
+“Anonymize” menus). Are the frequencies similar?</h3>
+<p>Frequencies and percentages before applying pram simple:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Marstat</th>
+<th align="center">Frequency</th>
+<th align="center">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">2547</td>
+<td align="center">63.68</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">162</td>
+<td align="center">4.05</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">171</td>
+<td align="center">4.28</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">1120</td>
+<td align="center">28</td>
+</tr>
+<tr class="odd">
+<td align="center">Sum</td>
+<td align="center">4000</td>
+<td align="center">100</td>
+</tr>
+</tbody>
+</table>
+<p>Frequencies and percentages after applying pram simple:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Marstat</th>
+<th align="center">Frequency</th>
+<th align="center">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">2538</td>
+<td align="center">63.45</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">166</td>
+<td align="center">4.15</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">176</td>
+<td align="center">4.4</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">1120</td>
+<td align="center">28</td>
+</tr>
+<tr class="odd">
+<td align="center">Sum</td>
+<td align="center">4000</td>
+<td align="center">100</td>
+</tr>
+</tbody>
+</table>
+<p>In this case, since the matrix used is way more accurate to the data
+we are using, we can see that the percentages and frequencies are almost
+the same before and after applying PRAM, with some small changes.</p>
+</div>
+<div id="d-create-an-sdcobject-like-the-one-in-the-previous-sections-and-pram-the-marstat-variable.-get-the-pram-array-from-the-pram-slot-of-the-sdcobject-and-perform-the-following-calculation" class="section level3">
+<h3>d) Create an sdcObject like the one in the previous sections and
+“pram” the MARSTAT variable. Get the PRAM array from the “pram” slot of
+the sdcObject and perform the following calculation:</h3>
+<ul>
+<li>Transpose the matrix and calculate the eigenvalues and the
+eigenvectors</li>
+<li>Check that 1 is one of the eigenvalues</li>
+<li>Normalize its associated eigenvector so that the sum of its
+components is 1.</li>
+<li>Compare the eigenvector with the percentages of the original values
+of MARSTAT. Drawn your own conclusions.</li>
+</ul>
+<p>Note that even though we run the commands in the console we attach
+them here.</p>
+<p>Creation of the problem.</p>
+<pre class="r"><code>inputdata &lt;- readMicrodata(path=&quot;newdataset&quot;, type=&quot;rdf&quot;, convertCharToFac=FALSE, drop_all_missings=FALSE)
+
+inputdataB &lt;- inputdata
+
+inputdataB &lt;- varToFactor(obj=inputdataB, var=c(&quot;SEX&quot;)) 
+inputdataB &lt;- varToFactor(obj=inputdataB, var=c(&quot;AGE&quot;)) 
+inputdataB &lt;- varToFactor(obj=inputdataB, var=c(&quot;REGION&quot;)) 
+inputdataB &lt;- varToFactor(obj=inputdataB, var=c(&quot;MARSTAT&quot;))
+
+sdcObj &lt;- createSdcObj(dat=inputdataB, 
+                       keyVars=c(&quot;REGION&quot;,&quot;SEX&quot;,&quot;AGE&quot;),  
+                       numVars=NULL,  
+                       weightVar=NULL,  
+                       hhId=NULL,  
+                       strataVar=NULL,  
+                       pramVars=c(&quot;MARSTAT&quot;),  
+                       excludeVars=NULL,  
+                       seed=500,  
+                       randomizeRecords=FALSE,  
+                       alpha=c(1))</code></pre>
+<p>Setting the transition matrix.</p>
+<pre class="r"><code>sdcObjp &lt;- pram(sdcObj, variables=c(&quot;MARSTAT&quot;), pd=0.8, alpha=0.5)
+P &lt;- sdcObjp@pram$params$MARSTAT$Rs
+P</code></pre>
+<pre><code>##            1           2           3          4
+## 1 0.97657259 0.004492974 0.003976878 0.01495756
+## 2 0.07063954 0.826899555 0.007072377 0.09538853
+## 3 0.05923456 0.006700147 0.851085505 0.08297979
+## 4 0.03401509 0.013797269 0.012669236 0.93951840</code></pre>
+<p>Transposing the matrix and obtaining the eigenvectors and
+eigenvalues.</p>
+<pre class="r"><code>transpose &lt;- t(P)
+transpose</code></pre>
+<pre><code>##             1           2           3          4
+## 1 0.976572589 0.070639540 0.059234556 0.03401509
+## 2 0.004492974 0.826899555 0.006700147 0.01379727
+## 3 0.003976878 0.007072377 0.851085505 0.01266924
+## 4 0.014957559 0.095388528 0.082979792 0.93951840</code></pre>
+<pre class="r"><code>eigen(transpose)</code></pre>
+<pre><code>## eigen() decomposition
+## $values
+## [1] 1.0000000 0.9378961 0.8410547 0.8151252
+## 
+## $vectors
+##            [,1]        [,2]       [,3]        [,4]
+## [1,] 0.91214222  0.76054906 -0.1473764 -0.23432656
+## [2,] 0.05801611 -0.05309503 -0.1608589  0.75123525
+## [3,] 0.06123923 -0.06346812  0.8267617  0.09307046
+## [4,] 0.40109905 -0.64398591 -0.5185264 -0.60997914</code></pre>
+<p>Normalize of the first eigenvector, the one associated with the 1
+eigenvalue.</p>
+<pre class="r"><code>eig &lt;- eigen(transpose)
+
+eigvec &lt;- eig$vectors[,1]
+eigvec &lt;- eigvec / sum(eigvec)
+eigvec</code></pre>
+<pre><code>## [1] 0.63675 0.04050 0.04275 0.28000</code></pre>
+<p>As can be seen, the percentages, are almost the same so the praming
+procedure did not have a significant impact on the distribution of
+categories.</p>
+<p>Now let’s execute again sdcApp() with pd=0.2 and alpha=0.9 and check
+the results.</p>
+<p>The following tables represents before and after applying
+PRAM(Simple) with the parameters above. Note that the numbers of MARSTAT
+represents the following status:</p>
+<ul>
+<li>4 -&gt; Single</li>
+<li>3 -&gt; Widle</li>
+<li>2 -&gt; Divorced</li>
+<li>1 -&gt; Married</li>
+</ul>
+<p>The following is the original values of the range (15-18):</p>
 <table>
 <thead>
 <tr class="header">
@@ -1724,28 +1975,53 @@ frequencies (“Anonymize/Explore variables” option).</h3>
 </tr>
 </tbody>
 </table>
-</div>
-<div id="c-undo-the-last-step-and-go-to-the-anonymizepram-simple-option-to-create-an-invariant-probability-transition-matrix-and-pram-the-variable-marstat-use-the-default-values-pd0.8-and-alpha0.5.-create-a-table-comparing-the-frequencies-and-percentages-of-the-marstat-variable-before-and-after-praming-use-explore-variables-in-microdata-and-anonymize-menus.-are-the-frequencies-similar" class="section level3">
-<h3>c) Undo the last step and go to the “Anonymize/PRAM (simple)” option
-to create an invariant probability transition matrix and “pram” the
-variable MARSTAT (use the default values pd=0.8 and alpha=0.5). Create a
-table comparing the frequencies and percentages of the MARSTAT variable
-before and after “praming” (use “Explore variables” in “Microdata” and
-“Anonymize” menus). Are the frequencies similar?</h3>
-</div>
-<div id="d-create-an-sdcobject-like-the-one-in-the-previous-sections-and-pram-the-marstat-variable.-get-the-pram-array-from-the-pram-slot-of-the-sdcobject-and-perform-the-following-calculation" class="section level3">
-<h3>d) Create an sdcObject like the one in the previous sections and
-“pram” the MARSTAT variable. Get the PRAM array from the “pram” slot of
-the sdcObject and perform the following calculation:</h3>
-<ul>
-<li>Transpose the matrix and calculate the eigenvalues and the
-eigenvectors</li>
-<li>Check that 1 is one of the eigenvalues</li>
-<li>Normalize its associated eigenvector so that the sum of its
-components is 1.</li>
-<li>Compare the eigenvector with the percentages of the original values
-of MARSTAT. Drawn your own conclusions.</li>
-</ul>
+<p>And after applying PRAM we obtain:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Age/Marstat</th>
+<th align="center">1</th>
+<th align="center">2</th>
+<th align="center">3</th>
+<th align="center">4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">15</td>
+<td align="center">32</td>
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">20</td>
+</tr>
+<tr class="even">
+<td align="center">16</td>
+<td align="center">44</td>
+<td align="center">4</td>
+<td align="center">2</td>
+<td align="center">23</td>
+</tr>
+<tr class="odd">
+<td align="center">17</td>
+<td align="center">32</td>
+<td align="center">3</td>
+<td align="center">5</td>
+<td align="center">21</td>
+</tr>
+<tr class="even">
+<td align="center">18</td>
+<td align="center">42</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">18</td>
+</tr>
+</tbody>
+</table>
+<p>We can see that the result is far away from the original values. The
+most significant case is that, there are 32 15-years old persons
+married, which is quite atypical among young people. In order to avoid
+this problem, we could modify the transition matrix so not that much
+people turn into married when single.</p>
 </div>
 </div>
 <div id="microaggregation" class="section level2">
@@ -1775,31 +2051,30 @@ sdc &lt;- varToFactor(sdc, &quot;MARSTAT&quot;)</code></pre>
 <h4>2. Execute the different microaggregation algorithms using K = 4 and
 compute the execution time for each of them. (K is the minimum size of
 each group).</h4>
-<pre class="r"><code># mdav, single, onedims
-print(&quot;Mdav algorithm time:&quot;)</code></pre>
-<pre><code>## [1] &quot;Mdav algorithm time:&quot;</code></pre>
 <pre class="r"><code>startMdav &lt;- Sys.time()
 mdavSdc &lt;- microaggregation(obj = sdc, method = &quot;mdav&quot;, aggr  = 4)
 endMdav &lt;- Sys.time()
 mdav_time &lt;- round(endMdav-startMdav,4)
-mdav_time</code></pre>
-<pre><code>## Time difference of 0.204 secs</code></pre>
-<pre class="r"><code>print(&quot;Single algorithm time:&quot;)</code></pre>
-<pre><code>## [1] &quot;Single algorithm time:&quot;</code></pre>
+print(&quot;Mdav algorithm time:&quot;)</code></pre>
+<pre><code>## [1] &quot;Mdav algorithm time:&quot;</code></pre>
+<pre class="r"><code>mdav_time</code></pre>
+<pre><code>## Time difference of 0.0652 secs</code></pre>
 <pre class="r"><code>startSingle &lt;- Sys.time()
 singleSdc &lt;- microaggregation(obj = sdc, method = &quot;single&quot;, aggr = 4)
 endSingle &lt;- Sys.time()
 single_time &lt;- round(endSingle-startSingle,4)
-single_time</code></pre>
-<pre><code>## Time difference of 0.2254 secs</code></pre>
-<pre class="r"><code>print(&quot;Onedims algorithm time:&quot;)</code></pre>
-<pre><code>## [1] &quot;Onedims algorithm time:&quot;</code></pre>
+print(&quot;Single algorithm time:&quot;)</code></pre>
+<pre><code>## [1] &quot;Single algorithm time:&quot;</code></pre>
+<pre class="r"><code>single_time</code></pre>
+<pre><code>## Time difference of 0.1553 secs</code></pre>
 <pre class="r"><code>startOnedims &lt;- Sys.time()
 onedimsSdc &lt;- microaggregation(obj = sdc, method = &quot;onedims&quot;, aggr = 4)
 endOnedims &lt;- Sys.time()
 onedims_time &lt;- round(endOnedims-startOnedims,4)
-onedims_time</code></pre>
-<pre><code>## Time difference of 0.0955 secs</code></pre>
+print(&quot;Onedims algorithm time:&quot;)</code></pre>
+<pre><code>## [1] &quot;Onedims algorithm time:&quot;</code></pre>
+<pre class="r"><code>onedims_time</code></pre>
+<pre><code>## Time difference of 0.0548 secs</code></pre>
 </div>
 <div id="from-the-new_sdc-object-get-the-following-risk-and-utility-measurements." class="section level4">
 <h4>3. From the new_sdc object get the following risk and utility
@@ -1826,9 +2101,9 @@ df_results &lt;- data.frame(algorithm, time, risk, utility, eigen)
 
 print(df_results)</code></pre>
 <pre><code>##   algorithm        time    risk     utility        eigen
-## 1      MDAV 0.2040 secs 0.05875  54903.6037 0.0001568712
-## 2    Single 0.2254 secs 0.00000 431155.9111 0.0269553104
-## 3   Onedims 0.0955 secs 1.00000    770.4681 0.0001238770</code></pre>
+## 1      MDAV 0.0652 secs 0.05875  54903.6037 0.0001568712
+## 2    Single 0.1553 secs 0.00000 431155.9111 0.0269553104
+## 3   Onedims 0.0548 secs 1.00000    770.4681 0.0001238770</code></pre>
 <p>From the results presented above, we can justify why MDAV is the most
 widely used microaggregation algorithm since it achieves a good balance
 between risk and utility. It has a lower risk value, indicating that it
