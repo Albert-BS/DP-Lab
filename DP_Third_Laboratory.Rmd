@@ -1,0 +1,79 @@
+---
+title: "DP_Third_Laboratory"
+author:
+- Teresa Ricciardi
+- Albert Bertran
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load, message=FALSE, warning=FALSE}
+library(sdcMicro)
+```
+
+```{r}
+sdcApp()
+```
+
+```{r}
+obj$inputdata <- readMicrodata(path="testdata", type="rdf", convertCharToFac=FALSE, drop_all_missings=FALSE)
+inputdataB <- obj$inputdata
+```
+
+```{r}
+inputdata <- varToFactor(obj=inputdataB, var="urbrur")
+inputdata <- varToFactor(obj=inputdataB, var="roof")
+inputdata <- varToFactor(obj=inputdataB, var="walls")
+inputdata <- varToFactor(obj=inputdataB, var="water")
+inputdata <- varToFactor(obj=inputdataB, var="electcon")
+inputdata <- varToFactor(obj=inputdataB, var="relat")
+inputdata <- varToFactor(obj=inputdataB, var="sex")
+inputdata <- varToFactor(obj=inputdataB, var="age")
+inputdata <- varToFactor(obj=inputdataB, var="hhcivil")
+## Set up sdcMicro object
+sdcObj <- createSdcObj(dat=inputdata,
+	keyVars=c("urbrur","roof","walls","water","electcon","relat","sex","age","hhcivil"), 
+	numVars=NULL, 
+	weightVar=NULL, 
+	hhId=NULL, 
+	strataVar=NULL, 
+	pramVars=NULL, 
+	excludeVars=NULL, 
+	seed=0, 
+	randomizeRecords=FALSE, 
+	alpha=c(1))
+```
+
+```{r}
+slotNames(sdcObj)
+
+str(sdcObj@risk)
+
+riskBefore <- sdcObj@risk$global$risk
+
+riskBeforeVector <- sdcObj@risk$individual[,"risk"]
+```
+
+```{r}
+mean(riskBeforeVector)
+```
+
+```{r}
+sdcObjAfter <- kAnon(sdcObj, importance=c(1,6,3,7,4,8,2,9,5), combs=NULL, k=c(5))
+```
+
+```{r}
+str(sdcObjAfter@risk)
+
+riskAfter <- sdcObjAfter@risk$global$risk
+
+riskAfterVector <- sdcObjAfter@risk$individual[,"risk"]
+```
+```{r}
+mean(riskAfterVector)
+```
+
