@@ -77,3 +77,68 @@ riskAfterVector <- sdcObjAfter@risk$individual[,"risk"]
 mean(riskAfterVector)
 ```
 
+```{r}
+sdcApp()
+```
+
+```{r}
+indivRisk3 <- c(0.004975, 0.004975, 0.001664, 0.001110)
+```
+
+```{r}
+1 - prod(1-indivRisk3)
+```
+Higher
+
+Check_hhrk_2.3:
+
+```{r}
+testdatadf<-as.data.frame(testdata)
+
+#categorical vars must be factors
+inputdata <- varToFactor(obj=testdatadf, var=c("urbrur","roof","walls","water","electcon","relat","sex","age","hhcivil"))
+
+#defining the sdcObject
+sdcObj <- createSdcObj(
+  dat=inputdata,
+  keyVars=c("urbrur","roof","walls","water","electcon","relat","sex","age","hhcivil"),
+  weightVar=c("sampling_weight"),
+  hhId=c("ori_hid"),
+)
+
+#obtaining the household risk from the object
+hh_rk <- sdcObj@risk$individual[sdcObj@origData$ori_hid==1,"hier_risk"]
+cat("The household risk for hh_id=1 is:",hh_rk[1])
+```
+
+```{r}
+data(francdat)
+```
+
+```{r}
+sdcApp()
+```
+
+```{r}
+testdatadf<-as.data.frame(francdat)
+
+#categorical vars must be factors
+inputdata <- varToFactor(obj=testdatadf, var=c("Key1","Key2","Key4"))
+
+#defining the sdcObject
+sdcObj <- createSdcObj(
+  dat=inputdata,
+  keyVars=c("Key1","Key2","Key4")
+)
+
+sdcObj <- varToFactor(sdcObj, "Key1")
+sdcObj <- varToFactor(sdcObj, "Key2")
+sdcObj <- varToFactor(sdcObj, "Key4")
+```
+
+```{r}
+sdcSuda <- suda2(obj = sdcObj)
+
+sdcSuda@risk$suda2$score
+```
+
