@@ -10,6 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+install.packages("LaplacesDemon")
+```
+
+
+```{r}
+adult_train <- read.csv("D:/adult_train.csv")
 library(LaplacesDemon)
 ```
 
@@ -20,7 +26,7 @@ adult <- adult_train[c('age')]
 
 ```{r, warning=FALSE}
 laplace_mechanism1 <- function(x, epsilon) {
-  sensitivity <- 1
+  sensitivity <- 125
   scale <- sensitivity / epsilon
   noise <- rlaplace(n = 1, loc = 0, scale = scale)
   return(x + noise)
@@ -36,14 +42,25 @@ dp_naive <- function(adult, epsilon) {
   return(as.data.frame(dp_data))
 }
 
-epsilon <- 0.5
-dp_data <- dp_naive(adult, epsilon)
-
-head(dp_data)
-```
-
-```{r}
-mean(dp_data$V1)
-mean(adult$age)
+epsilon <- 0.01
+errors = c()
+meanAfterDp = c()
+for (i in 1:10) {
+  histogramE = c()
+  histogramM = c()
+  for (j in 1:25) {
+    dp_data <- dp_naive(adult, epsilon)
+    mdp <- mean(dp_data$V1)
+    morig <- mean(adult$age)
+    histogramE[j] <- abs(mdp - morig)
+    histogramM[j] <- mdp
+  }
+  e <- mean(histogramE)
+  errors[i] <- e
+  m <- mean(histogramM)
+  meanAfterDp[i] <- m
+  epsilon <- epsilon + 0.299
+}
+errors
 ```
 
