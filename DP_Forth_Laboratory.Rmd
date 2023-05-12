@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+author: "Albert Bertran"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(LaplacesDemon)
+```
+
+```{r}
+adult <- adult_train[c('age')]
+```
+
+
+```{r, warning=FALSE}
+laplace_mechanism1 <- function(x, epsilon) {
+  sensitivity <- 1
+  scale <- sensitivity / epsilon
+  noise <- rlaplace(n = 1, loc = 0, scale = scale)
+  return(x + noise)
+}
+
+dp_naive <- function(adult, epsilon) {
+  n <- nrow(adult)
+  d <- ncol(adult)
+  dp_data <- matrix(0, nrow = n, ncol = d)
+  for (i in 1:n) {
+    dp_data[i] <- laplace_mechanism1(adult[i,], epsilon)
+  }
+  return(as.data.frame(dp_data))
+}
+
+epsilon <- 0.5
+dp_data <- dp_naive(adult, epsilon)
+
+head(dp_data)
+```
+
+```{r}
+mean(dp_data$V1)
+mean(adult$age)
+```
+
