@@ -2,14 +2,17 @@
 title: "Untitled"
 author: "Albert Bertran"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, eval=FALSE}
 install.packages("LaplacesDemon")
 ```
 
@@ -62,5 +65,130 @@ for (i in 1:10) {
   epsilon <- epsilon + 0.299
 }
 errors
+```
+
+```{r}
+dp_histogram_mean <- function(adult, epsilon, num_bins) {
+  n <- length(adult$age)
+  
+  # Calculate histogram properties
+  min_age <- min(adult$age)
+  max_age <- max(adult$age)
+  bin_width <- (max_age - min_age) / num_bins
+  
+  # Calculate global sensitivity of the histogram query
+  max_count <- 0
+  histogram_counts <- rep(0, num_bins)
+  
+  for (i in 1:n) {
+    individual_age <- adult$age[i]
+    bin_index <- pmin(pmax(floor((individual_age - min_age) / bin_width) + 1, 1), num_bins)
+    histogram_counts[bin_index] <- histogram_counts[bin_index] + 1
+    max_count <- max(max_count, histogram_counts[bin_index])
+  }
+  
+  # Apply Laplace noise to protect the histogram counts
+  noisy_counts <- histogram_counts + rlaplace(num_bins, scale = max_count / epsilon)
+  
+  # Compute the differentially private mean from the protected histogram
+  sum_age <- 0
+  total_count <- sum(noisy_counts)
+  
+  for (i in 1:num_bins) {
+    bin_age <- min_age + (i - 0.5) * bin_width
+    sum_age <- sum_age + noisy_counts[i] * bin_age
+  }
+  
+  dp_mean <- sum_age / total_count
+  
+  return(dp_mean)
+}
+
+# Main code
+epsilon_values <- seq(0.01, 3, by = 0.299)
+num_bins_list <- c(10, 25, 50, 100)
+num_iterations <- 25
+
+mean_values <- matrix(0, nrow = length(epsilon_values), ncol = length(num_bins_list))
+error_values <- matrix(0, nrow = length(epsilon_values), ncol = length(num_bins_list))
+
+for (i in 1:length(epsilon_values)) {
+  epsilon <- epsilon_values[i]
+  
+  for (j in 1:length(num_bins_list)) {
+    num_bins <- num_bins_list[j]
+    
+    histogram_errors <- matrix(0, nrow = num_iterations, ncol = 1)
+    mean_after_dp_list <- matrix(0, nrow = num_iterations, ncol = 1)
+    
+    for (iter in 1:num_iterations) {
+      dp_mean <- dp_histogram_mean(adult, epsilon, num_bins)
+      mean_after_dp_list[iter] <- dp_mean
+      orig_mean <- mean(adult$age)
+      histogram_errors[iter] <- abs(dp_mean - orig_mean)
+    }
+    
+    error_values[i, j] <- mean(histogram_errors)
+    mean_values[i, j] <- mean(mean_after_dp_list)
+  }
+}
+
+# Plot the results
+plot_labels <- paste("Bins:", num_bins_list)
+
+matplot(epsilon_values, error_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Error",
+        main = "Error vs. Epsilon for Different Numbers of Bins", col = 1:length(num_bins_list))
+legend("topright", legend = plot_labels, col = 1:length(num_bins_list), pch = 16, inset = 0.02)
+print(mean(adult$age))
+```
+
+```{r}
+# Laplace mechanism for differentially private summation query
+dp_summation <- function(data, epsilon) {
+  sensitivity <- max(data) - min(data)
+  scale <- sensitivity / epsilon
+  noise <- rlaplace(n = 1, loc = 0, scale = scale)
+  return(sum(data) + noise)
+}
+
+# Laplace mechanism for differentially private counting query
+dp_counting <- function(data, epsilon) {
+  sensitivity <- 125
+  scale <- sensitivity / epsilon
+  noise <- rlaplace(n = 1, loc = 0, scale = scale)
+  return(length(data) + noise)
+}
+
+# Initialize vectors to store error and mean values
+epsilon_values <- seq(0.01, 3, by = 0.299)
+error_values <- rep(0, length(epsilon_values))
+mean_values <- rep(0, length(epsilon_values))
+
+# Iterate over epsilon values
+for (i in 1:length(epsilon_values)) {
+  epsilon <- epsilon_values[i]
+  mean_results <- numeric(25)
+  error_results <- numeric(25)
+  
+  # Compute mean and error 25 times
+  for (j in 1:25) {
+    dp_sum <- dp_summation(adult$age, epsilon)
+    dp_count <- dp_counting(adult$age, epsilon)
+    orig_mean <- mean(adult$age)
+    
+    dp_mean <- dp_sum / dp_count
+    mean_results[j] <- dp_mean
+    error_results[j] <- abs(dp_mean - orig_mean)
+  }
+  
+  # Store mean and error values
+  mean_values[i] <- mean(mean_results)
+  error_values[i] <- mean(error_results)
+}
+
+# Plot the results
+plot(epsilon_values, error_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Error", main = "Error vs. Epsilon")
+plot(epsilon_values, mean_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Mean", main = "Mean vs. Epsilon")
+
 ```
 
