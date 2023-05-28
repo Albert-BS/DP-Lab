@@ -5,9 +5,9 @@ author:
 - Teresa Ricciardi
 date: "`r Sys.Date()`"
 output:
-  word_document: default
-  html_document: default
   pdf_document: default
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -28,7 +28,7 @@ adult_train <- read.csv("./adult_train.csv")
 library(LaplacesDemon)
 ```
 
-```{r}
+```{r, cache=TRUE}
 adult <- adult_train[c('age')]
 mean(adult$age)
 ```
@@ -68,7 +68,7 @@ In the following part of the code we start calculating the errors introduced by 
 For each repetition we calculate the mean value of the ‘V1’ column in the “dp_data” data frame, representing the mean value after applying the Laplace mechanism and the mean value of the ‘age’ column in the original “adult” data frame, representing the mean value before applying the Laplace mechanism.
 We calculate the absolute difference between the mean values before and after applying the Laplace mechanism and store it in the “histogramE” vector. Instead, the “histogramM” vector stores the mean value after applying the Laplace mechanism.
 
-```{r, eval=FALSE}
+```{r, cache=TRUE}
 epsilon <- 0.01
 errors = c()
 meanAfterDp = c()
@@ -94,7 +94,7 @@ epsilon_values <- seq(0.01, 3, by = 0.299)
 
 Now we can plot the results after applying the DP mechanism.
 
-```{r}
+```{r, cache=TRUE}
 plot(epsilon_values, meanAfterDp, type = "l", xlab = "Epsilon", ylab = "Mean After DP",
      main = "Mean After DP vs. Epsilon")
 
@@ -150,7 +150,7 @@ dp_histogram_mean <- function(adult, epsilon, num_bins) {
 
 Then, in the main code, we construct the sequence with the possible values of epsilon, we set the number of iterations, as 25 and we set the list of bins, in our case, [10, 25, 50, 100]. Then we compute for each epsilon value, the mean value and error for each possible bin size and we then store the error and the mean value to be displayed in a plot.
 
-```{r, eval=FALSE}
+```{r, cache=TRUE}
 # Main
 epsilon_values <- seq(0.01, 3, by = 0.299)
 num_bins_list <- c(10, 25, 50, 100)
@@ -181,7 +181,7 @@ for (i in 1:length(epsilon_values)) {
 }
 ```
 
-```{r}
+```{r, cache=TRUE}
 # Plot results
 plot_labels <- paste("Bins:", num_bins_list)
 
@@ -193,12 +193,13 @@ matplot(epsilon_values, mean_values, type = "b", pch = 16, xlab = "Epsilon", yla
         main = "Mean vs. Epsilon for Different Numbers of Bins", col = 1:length(num_bins_list))
 legend("topright", legend = plot_labels, col = 1:length(num_bins_list), pch = 16, inset = 0.02)
 ```
+In the plots above, we can see the mean and the errors when increasing the epsilon value depending on the number of bins. Each number of bins is represented by a different color. As we can see, when we use 10 bins the results fluctuate a lot in the first values of epsilon, showing that when the bins are smaller the result is less accurate to the original representation. We can also see that 25 and 50 take the correct curve of values earlier than the 10 case. And we can see that when we use 100 bins the results are a lot more accurate even when epsilon is still quite small. It is also worth noting that since we added the computation of the bins, this was the mechanism that takes most time to compute.
 
 ## C Summation and counting
 
 Finally, in this third exercise we will compute the DP for the summation and counting query. First we define the both functions corresponding to computing, first the DP of the summation query and second the one for the counting query.
 
-```{r}
+```{r, cache=TRUE}
 #Summation query
 dp_summation <- function(data, epsilon) {
   sensitivity <- max(data) - min(data)
@@ -218,7 +219,7 @@ dp_counting <- function(data, epsilon) {
 
 Finally, we initialize again the sequence for the epsilon value and we define the vectors that will store the mean values and the error. Then we iterate 25 times for each epsilon value and compute and store the mean to later on display it in the respective plots.
 
-```{r, eval=FALSE}
+```{r, cache=TRUE}
 epsilon_values <- seq(0.01, 3, by = 0.299)
 error_values <- rep(0, length(epsilon_values))
 mean_values <- rep(0, length(epsilon_values))
@@ -241,7 +242,8 @@ for (i in 1:length(epsilon_values)) {
   mean_values[i] <- mean(mean_results)
   error_values[i] <- mean(error_results)
 }
-
+```
+```{r, cache=TRUE}
 # Plot results
 plot(epsilon_values, error_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Error", main = "Error vs. Epsilon")
 plot(epsilon_values, mean_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Mean", main = "Mean vs. Epsilon")
