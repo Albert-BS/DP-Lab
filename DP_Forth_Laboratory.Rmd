@@ -1,6 +1,8 @@
 ---
 title: "Untitled"
-author: "Albert Bertran"
+author:
+- Albert Bertran
+- Teresa Ricciardi
 date: "`r Sys.Date()`"
 output:
   word_document: default
@@ -12,20 +14,30 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+In this laboratory session we are going to analyze three cases of data protection that can be used to compute the mean of a certain attribute and evaluate the accuracy of the resulting mean.
+After installing the R package called "LaplacesDemon" and loading the package into the R session, we read the CSV file “adult_train.csv” and store the data in a variable called “adult_train”. During this laboratory we want to focus only on the attribute “age”, so we create a new data frame called “adult” by selecting only the 'age' column from the adult_train data frame. We can also display the mean age of the original dataset, being 38.58.
+
+
 ```{r, eval=FALSE}
 install.packages("LaplacesDemon")
 ```
 
 
 ```{r}
-adult_train <- read.csv("D:/adult_train.csv")
+adult_train <- read.csv("./adult_train.csv")
 library(LaplacesDemon)
 ```
 
 ```{r}
 adult <- adult_train[c('age')]
+mean(adult$age)
 ```
+## A Naïve DP microdata
 
+After this we can start to perform the Laplace mechanism, using the function “laplace_mechanism1” that takes two parameters, ‘x’ and ‘epsilon’, where ‘x’ represents the input data and ‘epsilon’ represents the amount of privacy protection applied by the Laplace mechanism. 
+Inside the function we define the sensitivity of the data, that is a measure of how much a function's output can change when the input database changes by a single entry. In this case we set the sensitivity to 125, because the oldest person to ever lived is 122 y.o., so a reasonable upper bound is 125. We also define the scale that is given by the ratio between the sensitivity and epsilon and determine the amount of noise to be added to the data. 
+Then we draw a random sample from a Laplace distribution using the rlaplace() function from the "LaplacesDemon'' package. The ‘n’ parameter is set to 1 to generate a single sample, ‘loc’ is set to 0 to center the distribution at 0, and ‘scale’ is set to the calculated scale factor. The resulting value represents the noise to be added to the data. 
+The function returns the original input x plus the generated noise. This is the result of applying the Laplace mechanism to the data, which adds privacy protection by injecting noise to the output.
 
 ```{r, warning=FALSE}
 laplace_mechanism1 <- function(x, epsilon) {
@@ -34,7 +46,13 @@ laplace_mechanism1 <- function(x, epsilon) {
   noise <- rlaplace(n = 1, loc = 0, scale = scale)
   return(x + noise)
 }
+```
 
+At this point we can focus on the first case of data protection, the Naive DP microdata.
+We start defining the dp_naive function that takes two parameters: adult and epsilon. Then we calculate the number of rows and columns in the adult data frame and assign them to the variables ‘n’ and ‘d’. We create a matrix called “dp_data” with the same dimensions as the adult data frame. The matrix is initialized with zeros, and it will store the results of applying the Laplace mechanism to each row of the “adult” data frame. 
+Finally we convert the “dp_data” matrix into a data frame using the “as.data.frame()” function and return it as the result of the “dp_naive” function. The new data frame contains the noisy versions of the rows.
+
+```{r}
 dp_naive <- function(adult, epsilon) {
   n <- nrow(adult)
   d <- ncol(adult)
@@ -44,11 +62,17 @@ dp_naive <- function(adult, epsilon) {
   }
   return(as.data.frame(dp_data))
 }
+```
 
+In the following part of the code we start calculating the errors introduced by the Laplace mechanism when applied to the “adult” dataset with increasing values of epsilon (0.01-3). For each value of epsilon we take 25 repetitions.
+For each repetition we calculate the mean value of the ‘V1’ column in the “dp_data” data frame, representing the mean value after applying the Laplace mechanism and the mean value of the ‘age’ column in the original “adult” data frame, representing the mean value before applying the Laplace mechanism.
+We calculate the absolute difference between the mean values before and after applying the Laplace mechanism and store it in the “histogramE” vector. Instead, the “histogramM” vector stores the mean value after applying the Laplace mechanism.
+
+```{r, eval=FALSE}
 epsilon <- 0.01
 errors = c()
 meanAfterDp = c()
-for (i in 1:10) {
+for (i in 1:11) {
   histogramE = c()
   histogramM = c()
   for (j in 1:25) {
@@ -64,19 +88,40 @@ for (i in 1:10) {
   meanAfterDp[i] <- m
   epsilon <- epsilon + 0.299
 }
-errors
+
+epsilon_values <- seq(0.01, 3, by = 0.299)
 ```
+
+Now we can plot the results after applying the DP mechanism.
+
+```{r}
+plot(epsilon_values, meanAfterDp, type = "l", xlab = "Epsilon", ylab = "Mean After DP",
+     main = "Mean After DP vs. Epsilon")
+
+# Plot for errors
+plot(epsilon_values, errors, type = "l", xlab = "Epsilon", ylab = "Errors",
+     main = "Errors vs. Epsilon")
+
+```
+
+We can see in the plots above that as we increase the value of epsilon, the mean adjusts to the real value and the error decreases significantly. However note that since there is a part of randomization involved in the computation we had some different values in another executions, like that till epsilon 1 the mean value was not as adjusted as the one shown above. Even though when we keep increasing the epsilon the values adjust to the real ones
+
+## B Histograms
+
+In this second part of the laboratory we define a function called “dp_histogram_mean” that calculates the differentially private mean using a histogram-based approach. The function takes three parameters: ‘adult’, ‘epsilon’, and ‘num_bins’, where ‘num_bins’ represents the number of bins to divide the data for the histogram.
 
 ```{r}
 dp_histogram_mean <- function(adult, epsilon, num_bins) {
   n <- length(adult$age)
   
-  # Calculate histogram properties
+  #These lines calculate the minimum and maximum values of the age column in the adult data frame and assign them to the variables ‘min_age’ and ‘max_age’, respectively. These values are used to determine the range of the histogram and then we calculate the width of each bin in the histogram.
+  
   min_age <- min(adult$age)
   max_age <- max(adult$age)
   bin_width <- (max_age - min_age) / num_bins
   
-  # Calculate global sensitivity of the histogram query
+  #In the following part of the code we implement different iterations to construct a histogram of the input data, applying Laplace noise to the histogram counts, and computing the mean using the noisy counts and representative ages of each bin. This approach provides privacy guarantees while estimating the mean of the dataset.
+  
   max_count <- 0
   histogram_counts <- rep(0, num_bins)
   
@@ -87,10 +132,8 @@ dp_histogram_mean <- function(adult, epsilon, num_bins) {
     max_count <- max(max_count, histogram_counts[bin_index])
   }
   
-  # Apply Laplace noise to protect the histogram counts
   noisy_counts <- histogram_counts + rlaplace(num_bins, scale = max_count / epsilon)
   
-  # Compute the differentially private mean from the protected histogram
   sum_age <- 0
   total_count <- sum(noisy_counts)
   
@@ -103,8 +146,12 @@ dp_histogram_mean <- function(adult, epsilon, num_bins) {
   
   return(dp_mean)
 }
+```
 
-# Main code
+Then, in the main code, we construct the sequence with the possible values of epsilon, we set the number of iterations, as 25 and we set the list of bins, in our case, [10, 25, 50, 100]. Then we compute for each epsilon value, the mean value and error for each possible bin size and we then store the error and the mean value to be displayed in a plot.
+
+```{r, eval=FALSE}
+# Main
 epsilon_values <- seq(0.01, 3, by = 0.299)
 num_bins_list <- c(10, 25, 50, 100)
 num_iterations <- 25
@@ -132,18 +179,27 @@ for (i in 1:length(epsilon_values)) {
     mean_values[i, j] <- mean(mean_after_dp_list)
   }
 }
+```
 
-# Plot the results
+```{r}
+# Plot results
 plot_labels <- paste("Bins:", num_bins_list)
 
 matplot(epsilon_values, error_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Error",
         main = "Error vs. Epsilon for Different Numbers of Bins", col = 1:length(num_bins_list))
 legend("topright", legend = plot_labels, col = 1:length(num_bins_list), pch = 16, inset = 0.02)
-print(mean(adult$age))
+
+matplot(epsilon_values, mean_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Mean",
+        main = "Mean vs. Epsilon for Different Numbers of Bins", col = 1:length(num_bins_list))
+legend("topright", legend = plot_labels, col = 1:length(num_bins_list), pch = 16, inset = 0.02)
 ```
 
+## C Summation and counting
+
+Finally, in this third exercise we will compute the DP for the summation and counting query. First we define the both functions corresponding to computing, first the DP of the summation query and second the one for the counting query.
+
 ```{r}
-# Laplace mechanism for differentially private summation query
+#Summation query
 dp_summation <- function(data, epsilon) {
   sensitivity <- max(data) - min(data)
   scale <- sensitivity / epsilon
@@ -151,26 +207,27 @@ dp_summation <- function(data, epsilon) {
   return(sum(data) + noise)
 }
 
-# Laplace mechanism for differentially private counting query
+#Counting query
 dp_counting <- function(data, epsilon) {
   sensitivity <- 125
   scale <- sensitivity / epsilon
   noise <- rlaplace(n = 1, loc = 0, scale = scale)
   return(length(data) + noise)
 }
+```
 
-# Initialize vectors to store error and mean values
+Finally, we initialize again the sequence for the epsilon value and we define the vectors that will store the mean values and the error. Then we iterate 25 times for each epsilon value and compute and store the mean to later on display it in the respective plots.
+
+```{r, eval=FALSE}
 epsilon_values <- seq(0.01, 3, by = 0.299)
 error_values <- rep(0, length(epsilon_values))
 mean_values <- rep(0, length(epsilon_values))
 
-# Iterate over epsilon values
 for (i in 1:length(epsilon_values)) {
   epsilon <- epsilon_values[i]
   mean_results <- numeric(25)
   error_results <- numeric(25)
   
-  # Compute mean and error 25 times
   for (j in 1:25) {
     dp_sum <- dp_summation(adult$age, epsilon)
     dp_count <- dp_counting(adult$age, epsilon)
@@ -181,14 +238,13 @@ for (i in 1:length(epsilon_values)) {
     error_results[j] <- abs(dp_mean - orig_mean)
   }
   
-  # Store mean and error values
   mean_values[i] <- mean(mean_results)
   error_values[i] <- mean(error_results)
 }
 
-# Plot the results
+# Plot results
 plot(epsilon_values, error_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Error", main = "Error vs. Epsilon")
 plot(epsilon_values, mean_values, type = "b", pch = 16, xlab = "Epsilon", ylab = "Mean", main = "Mean vs. Epsilon")
 
 ```
-
+In this final exercise, we can see that the plots are quite similar with the first ones, as we increase the epsilon, the mean adjusts and the error reduces itself, however is worth noting that this last mechanism was the one that was achieving the most constant values over the several executions we did. Also note that this mechanism was the fastest one, while the others might last some minutes, this one is last a couple of seconds.
